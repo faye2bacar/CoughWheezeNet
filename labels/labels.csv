@@ -1,0 +1,4 @@
+filepath,label,patient_id,start_s,end_s,exac
+audio/patient_0001/sess_01.wav,0,0001,0.0,3.0,0.6
+audio/patient_0002/sess_01.wav,1,0002,1.0,5.0,0.9
+audio/patient_0003/sess_01.wav,2,0003,0.0,3.0,0.0
