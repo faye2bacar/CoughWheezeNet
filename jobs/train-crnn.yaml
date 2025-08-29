@@ -1,0 +1,14 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+code: ..
+command: >
+  python -m src.train --audio_dir ${{inputs.audio_dir}} --label_csv ${{inputs.label_csv}}
+  --epochs 50 --batch_size 32 --lr 1e-3 --mels 64 --sr 16000
+environment:
+  conda_file: env.yaml
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04
+compute: azureml:gpu-cluster
+inputs:
+  audio_dir: azureml://datastores/workspaceblobstore/paths/audio/
+  label_csv: azureml://datastores/workspaceblobstore/paths/labels/labels.csv
+experiment_name: coughwheeze_train
+description: Train CRNN Cough+Wheeze Net (16kHz) avec Lightning.

@@ -1,0 +1,20 @@
+{
+  "version": "1.0.3",
+  "published": "2025-08-10T12:00:00Z",
+  "models": [
+    {
+      "name": "crnn",
+      "file": "crnn.tflite",
+      "hash": "sha256:CHANGE_ME"
+    }
+  ],
+  "preproc": {
+    "sr": 16000,
+    "n_fft": 512,
+    "win_length": 400,
+    "hop_length": 160,
+    "n_mels": 64,
+    "fmin": 20,
+    "fmax": 7600
+  }
+}
