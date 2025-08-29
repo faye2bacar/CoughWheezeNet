@@ -1,6 +1,9 @@
 import torch
 import torch.nn as nn
-import pytorch_lightning as pl
+try:
+    import pytorch_lightning as pl
+except Exception:
+    pl = None
 from .config import TrainConfig
 
 class CRNN(nn.Module):
@@ -26,29 +29,34 @@ class CRNN(nn.Module):
         exa_seq = torch.sigmoid(self.head_exa(z).squeeze(-1))  # (B,T)
         return logits, exa_seq
 
-class LitCRNN(pl.LightningModule):
-    def __init__(self, cfg: TrainConfig):
-        super().__init__()
-        self.save_hyperparameters()
-        self.cfg = cfg
-        self.model = CRNN(cfg.n_mels, cfg.num_classes)
-        self.ce = nn.CrossEntropyLoss()
-        self.mse = nn.MSELoss()
-        self.lr = cfg.lr
-    def training_step(self, batch, batch_idx):
-        x,y,ex = batch
-        logits, exa = self.model(x)
-        loss = self.ce(logits, y) + 0.2*self.mse(exa.mean(dim=1), ex)
-        acc = (logits.argmax(1)==y).float().mean()
-        self.log_dict({"train/loss":loss, "train/acc":acc}, prog_bar=True)
-        return loss
-    def validation_step(self, batch, batch_idx):
-        x,y,ex = batch
-        logits, exa = self.model(x)
-        loss = self.ce(logits, y) + 0.2*self.mse(exa.mean(dim=1), ex)
-        acc = (logits.argmax(1)==y).float().mean()
-        self.log_dict({"val/loss":loss, "val/acc":acc}, prog_bar=True)
-    def configure_optimizers(self):
-        opt = torch.optim.AdamW(self.parameters(), lr=self.lr)
-        sch = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=self.cfg.epochs)
-        return {"optimizer": opt, "lr_scheduler": sch}
+if pl is not None:
+    class LitCRNN(pl.LightningModule):
+        def __init__(self, cfg: TrainConfig):
+            super().__init__()
+            self.save_hyperparameters()
+            self.cfg = cfg
+            self.model = CRNN(cfg.n_mels, cfg.num_classes)
+            self.ce = nn.CrossEntropyLoss()
+            self.mse = nn.MSELoss()
+            self.lr = cfg.lr
+        def training_step(self, batch, batch_idx):
+            x,y,ex = batch
+            logits, exa = self.model(x)
+            loss = self.ce(logits, y) + 0.2*self.mse(exa.mean(dim=1), ex)
+            acc = (logits.argmax(1)==y).float().mean()
+            self.log_dict({"train/loss":loss, "train/acc":acc}, prog_bar=True)
+            return loss
+        def validation_step(self, batch, batch_idx):
+            x,y,ex = batch
+            logits, exa = self.model(x)
+            loss = self.ce(logits, y) + 0.2*self.mse(exa.mean(dim=1), ex)
+            acc = (logits.argmax(1)==y).float().mean()
+            self.log_dict({"val/loss":loss, "val/acc":acc}, prog_bar=True)
+        def configure_optimizers(self):
+            opt = torch.optim.AdamW(self.parameters(), lr=self.lr)
+            sch = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=self.cfg.epochs)
+            return {"optimizer": opt, "lr_scheduler": sch}
+else:
+    class LitCRNN(object):
+        def __init__(self, *args, **kwargs):
+            raise ImportError("pytorch_lightning is required for LitCRNN but is not installed.")

@@ -21,7 +21,7 @@ class SegmentDataset(Dataset):
         seg = torch.from_numpy(x[start:end])
         mel = wav_to_logmel(seg, self.cfg.sr, self.cfg.n_fft, self.cfg.win_length,
                             self.cfg.hop_length, self.cfg.n_mels, self.cfg.fmin, self.cfg.fmax)
-        mel = mel.T.unsqueeze(0)  # (1, T, M) -> (C,T,M)
+        mel = mel.unsqueeze(0)  # (T, M) -> (C=1,T,M)
         y = torch.tensor(row.label, dtype=torch.long)
         exac = torch.tensor(row.get('exac', 0.0), dtype=torch.float32)
         return mel, y, exac

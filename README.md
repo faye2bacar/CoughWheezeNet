@@ -133,3 +133,29 @@ x = np.random.randn(sr*dur) * 0.01 + wheeze
 sf.write("dataset/audio/patient_0003/sess_01.wav", x, sr)
 ```
 
+## Données factices générées
+- Fichiers créés sous `audio/patient_0001` à 16 kHz:
+  - `audio/patient_0001/sess_toux.wav` (toux simulée)
+  - `audio/patient_0001/sess_bpco.wav` (BPCO simulée: souffle + sifflement)
+  - `audio/patient_0001/sess_sain.wav` (sain: bruit faible)
+- `labels/labels.csv` mis à jour pour pointer vers les classes:
+  - `audio/patient_0001/sess_bpco.wav,1,0001,1.0,5.0,0.9`
+  - `audio/patient_0001/sess_sain.wav,2,0001,0.0,3.0,0.0`
+
+## Démarrage rapide (min, CPU, sans MLflow)
+- Setup venv + deps (Windows PowerShell):
+  - `pwsh -File scripts/setup_venv.ps1`
+- Générer les WAV factices patient_0001:
+  - `.venv\Scripts\python scripts/gen_dummy_wavs.py`
+- Entraînement minimal (1 époque) sur `labels/labels.csv`:
+  - `.venv\Scripts\python -m scripts.train_min --label_csv labels/labels.csv --epochs 1 --batch_size 2`
+- Lancer les tests:
+  - `.venv\Scripts\python -m pytest -q`
+
+## Entraînement complet (Lightning, option MLflow)
+- Sans MLflow (CPU):
+  - `.venv\Scripts\python -m src.train --label_csv labels/labels.csv --epochs 5 --batch_size 4 --num_workers 0`
+- Avec MLflow (si installé):
+  - `.venv\Scripts\python -m pip install mlflow`
+  - `.venv\Scripts\python -m src.train --label_csv labels/labels.csv --epochs 5 --batch_size 4 --num_workers 0 --mlflow`
+
